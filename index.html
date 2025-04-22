@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>E-Scooter Vehicle Model</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 700px; margin: auto; }
+    label, input, button { display: block; margin: 10px 0; }
+    input[type="range"] { width: 100%; }
+    img { max-width: 100%; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>🛴 E-Scooter Vehicle Model</h2>
+
+  <form id="paramForm">
+    <label>Mass (kg): <span id="massVal">80</span></label>
+    <input type="range" min="50" max="150" value="80" id="mass">
+
+    <label>Rolling Resistance (crr): <span id="crrVal">0.01</span></label>
+    <input type="range" min="0.005" max="0.03" step="0.001" value="0.01" id="crr">
+
+    <label>Air Density (rho): <span id="rhoVal">1.225</span></label>
+    <input type="range" min="1.0" max="1.4" step="0.01" value="1.225" id="rho">
+
+    <label>Drag Coefficient (cd): <span id="cdVal">0.9</span></label>
+    <input type="range" min="0.3" max="1.2" step="0.01" value="0.9" id="cd">
+
+    <label>Frontal Area (A in m²): <span id="aVal">0.5</span></label>
+    <input type="range" min="0.2" max="1.0" step="0.01" value="0.5" id="a">
+
+    <label>Motor Efficiency: <span id="effVal">0.85</span></label>
+    <input type="range" min="0.5" max="0.95" step="0.01" value="0.85" id="eff">
+
+    <label>Brake Efficiency: <span id="brakeVal">0.6</span></label>
+    <input type="range" min="0.3" max="0.9" step="0.01" value="0.6" id="brake">
+
+    <button type="submit">Run Simulation</button>
+  </form>
+
+  <div id="results">
+    <h3>📈 Resulting Plot</h3>
+    <img id="plot" src="" alt="Your plot will appear here">
+  </div>
+
+  <script>
+    const updateLabel = (id, valId) => {
+      document.getElementById(id).addEventListener('input', e => {
+        document.getElementById(valId).textContent = e.target.value;
+      });
+    };
+
+    ["mass", "crr", "rho", "cd", "a", "eff", "brake"].forEach(id => {
+      updateLabel(id, id + "Val");
+    });
+
+    document.getElementById('paramForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const params = {
+        mass: +document.getElementById("mass").value,
+        crr: +document.getElementById("crr").value,
+        rho: +document.getElementById("rho").value,
+        cd: +document.getElementById("cd").value,
+        A: +document.getElementById("a").value,
+        motor_efficiency: +document.getElementById("eff").value,
+        brake_efficiency: +document.getElementById("brake").value
+      };
+      const res = await fetch("/run-model", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params)
+      });
+      const data = await res.json();
+      document.getElementById("plot").src = "data:image/png;base64," + data.plot;
+    });
+  </script>
+</body>
+</html>
